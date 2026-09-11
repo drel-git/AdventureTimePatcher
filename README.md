@@ -18,12 +18,16 @@ AdventureTimePatcher-win-x64.exe
 
 Pick your MacroQuest folder, then click **Check for Updates** or **Update Now**.
 
+The patcher also checks for newer patcher releases. If one is available, use **Update Patcher** first, then continue updating AdventureTime.
+
 ## Linux usage
 
 ```bash
 chmod +x AdventureTimePatcher-linux-x64
 ./AdventureTimePatcher-linux-x64 check --mq "/path/to/MQ/root"
 ./AdventureTimePatcher-linux-x64 update --mq "/path/to/MQ/root"
+./AdventureTimePatcher-linux-x64 self-check
+./AdventureTimePatcher-linux-x64 self-update
 ```
 
 The MQ root is the folder that contains `lua/` and `config/`. Under Lutris/Wine, this is usually inside the game/MacroQuest install folder, not the Wine prefix root.
