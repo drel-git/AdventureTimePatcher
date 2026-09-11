@@ -1,0 +1,159 @@
+<Window x:Class="AdventureTimePatcher.Gui.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AdventureTime Patcher"
+        Width="604"
+        Height="720"
+        MinWidth="604"
+        MinHeight="600"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ResizeMode="NoResize"
+        Background="Transparent">
+    <Window.Resources>
+        <Style x:Key="PatcherButton" TargetType="Button">
+            <Setter Property="Foreground" Value="#EAF6FF" />
+            <Setter Property="Background" Value="#153044" />
+            <Setter Property="BorderBrush" Value="#67C7F7" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="14,8" />
+            <Setter Property="MinHeight" Value="34" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="2">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1F4A68" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.55" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Border Margin="8" BorderBrush="#8FD3FF" BorderThickness="1" CornerRadius="8" Background="#061522">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="4" Opacity="0.8" />
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="36" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="#DD071522" CornerRadius="7,7,0,0" MouseLeftButtonDown="WindowDrag_MouseLeftButtonDown">
+                <Grid>
+                    <TextBlock Text="  AdventureTime Patcher"
+                               VerticalAlignment="Center"
+                               Foreground="#A7E2FF"
+                               FontFamily="Segoe UI Semibold"
+                               FontSize="13" />
+                    <Button x:Name="CloseButton"
+                            Content="x"
+                            Width="36"
+                            Height="36"
+                            HorizontalAlignment="Right"
+                            Padding="0"
+                            Background="Transparent"
+                            Foreground="#EAF6FF"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Click="CloseButton_Click" />
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="1" Margin="20,18,20,20">
+                <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="118" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Margin="0,0,0,18" MouseLeftButtonDown="WindowDrag_MouseLeftButtonDown">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Rectangle Grid.Column="0" Height="1" Fill="#6EC6F5" VerticalAlignment="Center" Margin="70,24,12,0" />
+                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                    <TextBlock Text="ADVENTURETIME" Foreground="#A7E2FF" FontSize="30" FontFamily="Consolas" FontWeight="Bold" HorizontalAlignment="Center" />
+                    <TextBlock Text="INSTALLER / UPDATER" Foreground="#FFD166" FontSize="12" FontFamily="Consolas" FontWeight="Bold" HorizontalAlignment="Center" />
+                </StackPanel>
+                <Rectangle Grid.Column="2" Height="1" Fill="#6EC6F5" VerticalAlignment="Center" Margin="12,24,70,0" />
+            </Grid>
+
+            <Grid Grid.Row="1" Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="MacroQuest Folder" Foreground="#FFD166" VerticalAlignment="Center" Margin="0,0,10,0" />
+                <TextBox x:Name="MqDirTextBox" Grid.Column="1" Height="32" Background="#0B1B2B" Foreground="#EAF6FF" BorderBrush="#67C7F7" BorderThickness="1" Padding="8,5" TextChanged="MqDirTextBox_TextChanged" />
+                <Button Grid.Column="2" x:Name="BrowseButton" Content="Browse..." Style="{StaticResource PatcherButton}" Margin="10,0,0,0" Click="BrowseButton_Click" />
+            </Grid>
+
+            <StackPanel Grid.Row="2" Margin="0,0,0,12">
+                <TextBlock x:Name="StatusLine" Text="Pick your MacroQuest folder." Foreground="#A8C7D8" FontWeight="Bold" />
+                <TextBlock x:Name="VersionLine" Text="Installed unknown   |   Latest unknown" Foreground="#A8C7D8" Margin="0,4,0,0" />
+            </StackPanel>
+
+            <Grid Grid.Row="3" Margin="0,0,0,12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="What's New" Foreground="#FFD166" FontWeight="Bold" Margin="0,0,0,6" />
+                <Border Grid.Row="1" BorderBrush="#67C7F7" BorderThickness="1" Background="#081828">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <TextBlock x:Name="PatchNotesText" Text="Check GitHub for update details." Foreground="#EAF6FF" FontFamily="Consolas" TextWrapping="Wrap" Padding="10" />
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+
+            <Grid Grid.Row="4" Margin="0,0,0,10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Log" Foreground="#FFD166" FontWeight="Bold" Margin="0,0,0,6" />
+                <Border Grid.Row="1" BorderBrush="#67C7F7" BorderThickness="1" Background="#081828">
+                    <ScrollViewer x:Name="LogScroll" VerticalScrollBarVisibility="Auto">
+                        <TextBlock x:Name="LogText" Foreground="#EAF6FF" FontFamily="Consolas" TextWrapping="Wrap" Padding="10" />
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+
+            <Button Grid.Row="5" x:Name="ActionButton" Content="Check for Updates" Style="{StaticResource PatcherButton}" FontSize="16" FontWeight="Bold" Height="58" Click="ActionButton_Click" />
+            <TextBlock Grid.Row="6" x:Name="ActionHint" Text="Choose your MacroQuest folder, then check for updates." Foreground="#A8C7D8" Margin="0,8,0,12" />
+
+            <DockPanel Grid.Row="7" LastChildFill="False" Margin="0,4,0,0">
+                <TextBlock DockPanel.Dock="Left" Foreground="#8FD3FF">
+                    <Hyperlink NavigateUri="https://github.com/sebbun123/Adventuretime" RequestNavigate="GitHubLink_RequestNavigate">
+                        <Run Text="AdventureTime on GitHub" />
+                    </Hyperlink>
+                </TextBlock>
+                <TextBlock x:Name="PatcherVersionText" DockPanel.Dock="Right" Foreground="#7F9CAF" />
+            </DockPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
