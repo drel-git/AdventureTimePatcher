@@ -50,6 +50,14 @@ public sealed class PatcherService
 
     public static string PatcherDownloadUrl => OperatingSystem.IsWindows() ? PatcherDownloadUrlWindows : PatcherDownloadUrlLinux;
 
+    private static readonly HashSet<string> ManagedLuaFiles = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "lua/adventuretime/init.lua",
+        "lua/adventuretime/README.md",
+        "lua/adventuretime/AdventureTime_targets.ini",
+        "lua/adventuretime/AdventureTime_targets.ini.example",
+    };
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
@@ -155,11 +163,13 @@ public sealed class PatcherService
                 var targetsDst = Path.Combine(luaDir, "AdventureTime_targets.ini");
                 if (File.Exists(targetsDst))
                 {
+                    EnsureManagedLuaFile("lua/adventuretime/AdventureTime_targets.ini.example");
                     File.Copy(targetsSrc, Path.Combine(luaDir, "AdventureTime_targets.ini.example"), overwrite: true);
                     copied.Add("lua/adventuretime/AdventureTime_targets.ini.example");
                 }
                 else
                 {
+                    EnsureManagedLuaFile("lua/adventuretime/AdventureTime_targets.ini");
                     File.Copy(targetsSrc, targetsDst);
                     copied.Add("lua/adventuretime/AdventureTime_targets.ini");
                 }
@@ -341,6 +351,7 @@ public sealed class PatcherService
 
     private static void CopyOverwriteWithBackup(string source, string destination, string backupDir, string displayPath, List<string> copied)
     {
+        EnsureManagedLuaFile(displayPath);
         if (!File.Exists(source)) throw new FileNotFoundException($"Required source file missing: {source}");
         Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
 
@@ -352,6 +363,13 @@ public sealed class PatcherService
 
         File.Copy(source, destination, overwrite: true);
         copied.Add(displayPath);
+    }
+
+    private static void EnsureManagedLuaFile(string displayPath)
+    {
+        var normalized = displayPath.Replace('\\', '/');
+        if (!ManagedLuaFiles.Contains(normalized))
+            throw new InvalidOperationException($"Refusing to overwrite unmanaged AdventureTime file: {displayPath}");
     }
 
     private static void WriteMarker(string mqRoot, InstallMarker marker)
