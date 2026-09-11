@@ -30,6 +30,13 @@ internal static class Program
 
         var command = args[0].ToLowerInvariant();
         var opt = Options.Parse(args.Skip(1).ToArray());
+        var service = new PatcherService();
+
+        if (command is "self-check" or "selfcheck")
+            return SelfCheck(service);
+        if (command is "self-update" or "selfupdate")
+            return await SelfUpdateAsync(service).ConfigureAwait(false);
+
         if (string.IsNullOrWhiteSpace(opt.MqRoot))
         {
             Console.Error.WriteLine("Missing required --mq \"/path/to/MQ/root\".");
@@ -38,8 +45,6 @@ internal static class Program
         }
 
         var repo = new RepoRef(opt.Owner ?? DefaultOwner, opt.Repo ?? DefaultRepo, opt.Branch ?? DefaultBranch);
-        var service = new PatcherService();
-
         return command switch
         {
             "check" => await CheckAsync(service, opt.MqRoot, repo).ConfigureAwait(false),
@@ -62,6 +67,8 @@ internal static class Program
         Console.WriteLine("Usage:");
         Console.WriteLine("  AdventureTimePatcher check  --mq \"/path/to/MQ/root\"");
         Console.WriteLine("  AdventureTimePatcher update --mq \"/path/to/MQ/root\"");
+        Console.WriteLine("  AdventureTimePatcher self-check");
+        Console.WriteLine("  AdventureTimePatcher self-update");
         Console.WriteLine();
         Console.WriteLine("Options:");
         Console.WriteLine("  --mq <path>       MacroQuest root folder containing lua/ and config/");
@@ -69,6 +76,73 @@ internal static class Program
         Console.WriteLine("  --repo <repo>     GitHub repo override, default Adventuretime");
         Console.WriteLine("  --branch <name>   GitHub branch override, default main");
         Console.WriteLine("  --force           Allow replacing a newer local test build");
+    }
+
+    private static int SelfCheck(PatcherService service)
+    {
+        var result = service.CheckSelfUpdate();
+        Console.WriteLine($"Patcher local:  v{result.LocalVersion}");
+        if (string.IsNullOrWhiteSpace(result.LatestVersion))
+        {
+            Console.WriteLine("Patcher latest: (could not reach GitHub)");
+            return 0;
+        }
+        Console.WriteLine($"Patcher latest: v{result.LatestVersion}");
+        if (!result.UpdateAvailable)
+        {
+            Console.WriteLine("Patcher is up to date.");
+            return 0;
+        }
+        Console.WriteLine($"Update available. Run: AdventureTimePatcher self-update");
+        Console.WriteLine($"Download: {result.DownloadUrl}");
+        return 10;
+    }
+
+    private static async Task<int> SelfUpdateAsync(PatcherService service)
+    {
+        var self = service.CheckSelfUpdate();
+        if (!self.UpdateAvailable)
+        {
+            Console.WriteLine(string.IsNullOrWhiteSpace(self.LatestVersion)
+                ? "Could not reach GitHub to check patcher updates."
+                : $"Already up to date (v{self.LocalVersion}).");
+            return 0;
+        }
+
+        Console.WriteLine($"Updating patcher v{self.LocalVersion} -> v{self.LatestVersion}...");
+        var log = new Progress<string>(line => Console.WriteLine($"[{Product}] {line}"));
+        if (OperatingSystem.IsLinux())
+        {
+            await service.ApplyLinuxSelfUpdateAsync(log, CancellationToken.None).ConfigureAwait(false);
+            Console.WriteLine("Done. Re-run AdventureTimePatcher.");
+            return 0;
+        }
+        if (OperatingSystem.IsWindows())
+        {
+            var downloaded = await service.DownloadLatestPatcherAsync(log, CancellationToken.None).ConfigureAwait(false);
+            var target = Environment.ProcessPath;
+            if (string.IsNullOrWhiteSpace(target) || !File.Exists(target))
+                throw new InvalidOperationException("Could not resolve this patcher's path.");
+            var helper = PatcherService.WriteWindowsSelfUpdateHelper(
+                Environment.ProcessId,
+                downloaded,
+                target,
+                Path.GetDirectoryName(target));
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = $"/c \"{helper}\"",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden,
+                WorkingDirectory = Path.GetDirectoryName(helper) ?? "",
+            });
+            Console.WriteLine("Restarting into the new patcher...");
+            return 0;
+        }
+
+        Console.WriteLine($"Unsupported OS for self-update. Download: {self.DownloadUrl}");
+        return 2;
     }
 
     private static async Task<int> CheckAsync(PatcherService service, string mqRoot, RepoRef repo)

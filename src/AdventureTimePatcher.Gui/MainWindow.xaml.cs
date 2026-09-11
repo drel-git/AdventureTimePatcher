@@ -24,6 +24,7 @@ public partial class MainWindow : Window
     private string _latestSha = "";
     private string _installedSha = "";
     private string _startupCommand = "";
+    private string _selfLatestVersion = "";
 
     public MainWindow()
     {
@@ -37,6 +38,7 @@ public partial class MainWindow : Window
             ActionHint.Text = "AdventureTime closed in-game. Click Update to install the latest copy.";
             _ = CheckAsync();
         }
+        _ = RefreshSelfUpdateAsync();
     }
 
     private void ParseStartupArgs()
@@ -148,6 +150,97 @@ public partial class MainWindow : Window
         });
     }
 
+    private async Task RefreshSelfUpdateAsync()
+    {
+        try
+        {
+            var result = await Task.Run(() => _service.CheckSelfUpdate());
+            if (!result.UpdateAvailable)
+            {
+                SelfUpdateBanner.Visibility = Visibility.Collapsed;
+                return;
+            }
+            _selfLatestVersion = result.LatestVersion;
+            SelfUpdateText.Text =
+                $"Patcher update available: you have v{result.LocalVersion}, latest is v{result.LatestVersion}. " +
+                "Update the patcher first for the newest installer features.";
+            SelfUpdateBanner.Visibility = Visibility.Visible;
+            AppendLog($"Patcher update available: v{result.LocalVersion} -> v{result.LatestVersion}");
+        }
+        catch
+        {
+            SelfUpdateBanner.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private async void SelfUpdateButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_busy) return;
+        _busy = true;
+        SelfUpdateButton.IsEnabled = false;
+        SelfUpdateButton.Content = "Updating...";
+        ActionHint.Text = "Downloading the new patcher, then restarting quietly...";
+        try
+        {
+            var log = new Progress<string>(AppendLog);
+            var downloaded = await _service.DownloadLatestPatcherAsync(log, CancellationToken.None);
+            var target = Environment.ProcessPath;
+            if (string.IsNullOrWhiteSpace(target) || !File.Exists(target))
+                throw new InvalidOperationException("Could not resolve this patcher's path.");
+
+            var helper = PatcherService.WriteWindowsSelfUpdateHelper(
+                Environment.ProcessId,
+                downloaded,
+                target,
+                Path.GetDirectoryName(target),
+                BuildRelaunchArgsForCmd());
+
+            try
+            {
+                File.WriteAllText(
+                    Path.Combine(Path.GetTempPath(), "AdventureTimePatcher_update", "relaunched.flag"),
+                    _selfLatestVersion);
+            }
+            catch { }
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = $"/c \"{helper}\"",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                WorkingDirectory = Path.GetDirectoryName(helper) ?? "",
+            });
+            AppendLog("Restarting into the new patcher...");
+            System.Windows.Application.Current.Shutdown();
+        }
+        catch (Exception ex)
+        {
+            AppendLog($"ERROR: Self-update failed: {ex.Message}");
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = PatcherService.PatcherDownloadUrl,
+                    UseShellExecute = true
+                });
+                AppendLog("Opened browser download as fallback.");
+            }
+            catch (Exception ex2)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Could not update or open the download link.\n\n{ex.Message}\n{ex2.Message}",
+                    "AdventureTime Patcher",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
+            SelfUpdateButton.Content = "Update Patcher";
+            SelfUpdateButton.IsEnabled = true;
+            _busy = false;
+        }
+    }
+
     private async Task RunAsync(Func<Task> work)
     {
         try
@@ -174,6 +267,7 @@ public partial class MainWindow : Window
         BrowseButton.IsEnabled = !busy;
         MqDirTextBox.IsEnabled = !busy;
         ActionButton.IsEnabled = !busy;
+        if (SelfUpdateButton != null) SelfUpdateButton.IsEnabled = !busy;
         Cursor = busy ? System.Windows.Input.Cursors.Wait : System.Windows.Input.Cursors.Arrow;
     }
 
@@ -216,6 +310,22 @@ public partial class MainWindow : Window
         Process.Start(new ProcessStartInfo { FileName = e.Uri.AbsoluteUri, UseShellExecute = true });
         e.Handled = true;
     }
+
+    private string BuildRelaunchArgsForCmd()
+    {
+        var parts = new List<string>();
+        if (!string.IsNullOrWhiteSpace(_startupCommand))
+            parts.Add(QuoteForCmd(_startupCommand));
+        var mq = MqDirTextBox.Text;
+        if (!string.IsNullOrWhiteSpace(mq))
+        {
+            parts.Add("--mq");
+            parts.Add(QuoteForCmd(mq));
+        }
+        return string.Join(" ", parts);
+    }
+
+    private static string QuoteForCmd(string value) => "\"" + value.Replace("\"", "\"\"") + "\"";
 
     private void AppendLog(string message)
     {

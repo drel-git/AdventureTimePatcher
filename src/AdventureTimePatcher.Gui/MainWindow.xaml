@@ -79,6 +79,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="118" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
@@ -116,7 +117,37 @@
                 <TextBlock x:Name="VersionLine" Text="Installed unknown   |   Latest unknown" Foreground="#A8C7D8" Margin="0,4,0,0" />
             </StackPanel>
 
-            <Grid Grid.Row="3" Margin="0,0,0,12">
+            <Border x:Name="SelfUpdateBanner"
+                    Grid.Row="3"
+                    Visibility="Collapsed"
+                    Background="#22183044"
+                    BorderBrush="#8FD3FF"
+                    BorderThickness="1"
+                    CornerRadius="3"
+                    Padding="10,8"
+                    Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="SelfUpdateText"
+                               Grid.Column="0"
+                               VerticalAlignment="Center"
+                               Foreground="#A7E2FF"
+                               TextWrapping="Wrap"
+                               Margin="0,0,10,0"
+                               Text="A newer AdventureTime Patcher is available." />
+                    <Button x:Name="SelfUpdateButton"
+                            Grid.Column="1"
+                            Content="Update Patcher"
+                            MinWidth="116"
+                            Style="{StaticResource PatcherButton}"
+                            Click="SelfUpdateButton_Click" />
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="4" Margin="0,0,0,12">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
@@ -129,7 +160,7 @@
                 </Border>
             </Grid>
 
-            <Grid Grid.Row="4" Margin="0,0,0,10">
+            <Grid Grid.Row="5" Margin="0,0,0,10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
@@ -142,10 +173,10 @@
                 </Border>
             </Grid>
 
-            <Button Grid.Row="5" x:Name="ActionButton" Content="Check for Updates" Style="{StaticResource PatcherButton}" FontSize="16" FontWeight="Bold" Height="58" Click="ActionButton_Click" />
-            <TextBlock Grid.Row="6" x:Name="ActionHint" Text="Choose your MacroQuest folder, then check for updates." Foreground="#A8C7D8" Margin="0,8,0,12" />
+            <Button Grid.Row="6" x:Name="ActionButton" Content="Check for Updates" Style="{StaticResource PatcherButton}" FontSize="16" FontWeight="Bold" Height="58" Click="ActionButton_Click" />
+            <TextBlock Grid.Row="7" x:Name="ActionHint" Text="Choose your MacroQuest folder, then check for updates." Foreground="#A8C7D8" Margin="0,8,0,12" />
 
-            <DockPanel Grid.Row="7" LastChildFill="False" Margin="0,4,0,0">
+            <DockPanel Grid.Row="8" LastChildFill="False" Margin="0,4,0,0">
                 <TextBlock DockPanel.Dock="Left" Foreground="#8FD3FF">
                     <Hyperlink NavigateUri="https://github.com/sebbun123/Adventuretime" RequestNavigate="GitHubLink_RequestNavigate">
                         <Run Text="AdventureTime on GitHub" />
