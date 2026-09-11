@@ -53,7 +53,7 @@ jobs:
             -p:PublishSingleFile=true \
             -p:PublishTrimmed=false \
             -o publish/linux-x64
-          mv publish/linux-x64/AdventureTimePatcher publish/AdventureTimePatcher-linux-x64
+          mv publish/linux-x64/AdventureTimePatcherCli publish/AdventureTimePatcher-linux-x64
           chmod +x publish/AdventureTimePatcher-linux-x64
       - name: Upload artifact
         uses: actions/upload-artifact@v4
