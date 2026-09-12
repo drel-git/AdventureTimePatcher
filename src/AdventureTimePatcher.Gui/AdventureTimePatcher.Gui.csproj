@@ -7,9 +7,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>AdventureTimePatcher</AssemblyName>
-    <Version>1.0.3</Version>
-    <AssemblyVersion>1.0.3.0</AssemblyVersion>
-    <FileVersion>1.0.3.0</FileVersion>
+    <Version>1.0.4</Version>
+    <AssemblyVersion>1.0.4.0</AssemblyVersion>
+    <FileVersion>1.0.4.0</FileVersion>
+    <ApplicationIcon>Assets\AdventureTime.ico</ApplicationIcon>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
@@ -17,6 +18,12 @@
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <DebugType>none</DebugType>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Assets\AdventureTime.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\AdventureTime.ico" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AdventureTimePatcher.Core\AdventureTimePatcher.Core.csproj" />
   </ItemGroup>

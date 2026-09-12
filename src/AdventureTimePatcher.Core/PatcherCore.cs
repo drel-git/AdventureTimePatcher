@@ -42,7 +42,7 @@ public sealed class PatcherService
 {
     public const string MarkerFileName = "adventuretime_install.json";
     public const string StatusFileName = "adventuretime_update_status.json";
-    private const string PatcherOwner = "drel-git";
+    private const string PatcherOwner = "sebbun123";
     private const string PatcherRepo = "AdventureTimePatcher";
     private const string PatcherLatestApi = $"https://api.github.com/repos/{PatcherOwner}/{PatcherRepo}/releases/latest";
     private const string PatcherDownloadUrlWindows = $"https://github.com/{PatcherOwner}/{PatcherRepo}/releases/latest/download/AdventureTimePatcher-win-x64.exe";

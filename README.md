@@ -16,11 +16,15 @@ Download and run:
 AdventureTimePatcher-win-x64.exe
 ```
 
+Latest Windows download: https://github.com/sebbun123/AdventureTimePatcher/releases/latest/download/AdventureTimePatcher-win-x64.exe
+
 Pick your MacroQuest folder, then click **Check for Updates** or **Update Now**.
 
 The patcher also checks for newer patcher releases. If one is available, use **Update Patcher** first, then continue updating AdventureTime.
 
 ## Linux usage
+
+Latest Linux download: https://github.com/sebbun123/AdventureTimePatcher/releases/latest/download/AdventureTimePatcher-linux-x64
 
 ```bash
 chmod +x AdventureTimePatcher-linux-x64
